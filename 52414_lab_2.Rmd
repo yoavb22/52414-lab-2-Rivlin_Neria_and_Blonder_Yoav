@@ -136,12 +136,37 @@ hist(fifa$Overall)
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q1D
 ```{r}
-hist(fifa$Overall)
+q_1_D_f <- select(fifa,Name,Overall,Value)
+q_1_D_1 <- q_1_D_f %>% 
+  arrange(desc(Overall)) %>% 
+  head(10)
+q_1_D_1$Value = comma(q_1_D_1$Value)
+print(q_1_D_1)
+q_1_D_2 <- q_1_D_f %>% 
+  arrange(desc(Value)) %>% 
+  head(10)
+q_1_D_2$Value = comma(q_1_D_2$Value)
+print(q_1_D_2)
+
 ```
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+Manuel Neuer is the best player out from the top 10 values player
+
 Q1E
 ```{r}
-hist(fifa$Overall)
+group_1E <- group_by(fifa,Club)
+summ_1E <- summarize(group_1E, ave_age=mean(Age))
+q_1_E_1 <- summ_1E %>% 
+  arrange(desc(ave_age)) %>% 
+  head(10)
+print(q_1_E_1)
+q_1_E_2 <- summ_1E %>% 
+  arrange(desc(-ave_age)) %>% 
+  head(10)
+print(q_1_E_2)
+
+
+
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 
