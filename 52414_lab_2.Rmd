@@ -1,0 +1,204 @@
+---
+title: "52414: Lab 2"
+author: "Or Zuk"
+date: "May 19, 2020"
+output: html_document
+---
+
+
+## *Lab 2: Visualization Through `ggplot`*  
+<br/><br/>  
+  
+
+**Contents**:  
+
+* [Q0. Submission Instructions](#submission-instructions)  
+* [Q1. Basic Statistics (25 pt)](#basic-statistics)      
+* [Q2. Scouting Report (25 pt)](#scouting-report)    
+* [Q3. Model Building (30 pt)](#model-building)
+* [Q4. Fix Problematic Plots (10 pt)](#fix-problematic-plots)  
+* [Q5. Open Question (10 pt)](#open-question)
+
+<br/><br/>
+  
+  
+### Q0.Submission Instructions  
+  
+This lab will be submitted in pairs using GitHub (if you don't have a pair, please contact us).  
+Please follow the steps in the  [GitHub-Classroom Lab 2](https://classroom.github.com/g/6_Wy5z44) to create your group's Lab 2 repository.  
+**Important: your team's name must be `FamilyName1_Name1_and_FamilyName2_Name2`**.  
+You can collaborate with your partner using the git environment; You can either make commits straight to master, or create individual branches (recommended). However, once done, be sure to merge your branches to master - you will be graded using the most recent *master* version - your last push and merge before the deadline.   
+**Please do not open/review other peoples' repositories - we will be notified by GitHub if you do.**
+
+Your final push should include this Rmd file (with your answers) together with the html file that is outputted automatically by knitr when you knit the Rmd. Anything else will be disregarded. In addition, please adhere to the following file format:    
+`Lab_2_FamilyName1_Name1_and_FamilyName2_Name2.Rmd/html`      
+
+Some questions may require data wrangling and manipulation which you need to decide on. <br>
+In some graphs you may need to change the graph limits. If you do so, please include the outlier 
+points you have removed in a separate table.
+
+Show numbers in plots/tables using standard digits and not scientific display. That is: 90000000 and not 9e+06. <br>
+Round numbers to at most 3 digits after the dot - that is, 9.456 and not 9.45581451044
+
+
+The required libraries are listed below the instructions. You are allowed to add additional libraries if you want. 
+If you do so, *please explain what libraries you've added, and what is each new library used for*. 
+
+#### Background: 
+
+You've been hired as a data analyst at the football (soccer) club Hapoel London. 
+Since this is a small and under-funded club, you will not have access to real-football data, but to data from 
+the football computer game fifa18. Your job is to analyze this dataset and extract meaningful insights from the data in order 
+to help your club make better decisions. 
+
+#### Data File: 
+You will load and analyze the fifa18 football dataset file called "fifa_data.csv". <br> 
+The dataset contains detailed information about each player in the game, including: names, age, nationality, overall ability, estimated potential ability, current club and league, market value, salary (wage), ability at different football skills (also called 'attributes', e.g. Ball.control, Sprint.speed ...), ability to play at different position in the game (CF, CM, ...) and the preferred positions of the player. 
+
+
+
+Required Libraries:
+```{r, echo=FALSE}
+library(ggplot2)
+library(dplyr)
+library(corrplot)
+library(scales)   # needed for formatting y-axis labels to non-scientific type
+library(radarchart)
+library(tidyr)
+library(tidyverse)
+library(reshape2) # melt
+library(ggthemes)
+library(rworldmap) # world map
+library(modelr)
+library(radarchart) #Spider chart
+```
+
+<br/><br/>
+
+## Q1. Basic Statistics (25 pt)         
+
+First, you are requested to load the fifa18 dataset and find and display general information about the players. 
+
+a. Make a plot showing the age distribution of all players.
+b. Make a plot comparing the *overall* ability of players in different leagues ('League'). Describe which leagues have especially good/bad players.
+c. Make a plot showing the density of players' salary ('Wage') distribution. <br>
+Next, make a separate plot showing the density distribution of the *log* of players' salary. <br>
+Which of the two visualizations is better? how skewed are the distributions? do they have fat tails? which is better described by a Normal distribution? explain. 
+d. Are the top-10 players with the highest value also the top-10 best players in terms of *overall* ability? 
+Show tables for both and compare. <br> Who is the best player not in the top-10 valued players? 
+e. Show a table of the ten *best* and ten *worst* teams in terms of *average* player overall ability. 
+
+
+Loading the data:
+```{r}
+fifa_players <- data.frame(read.csv(url("https://raw.githubusercontent.com/DataScienceHU/DataAnalysisR_2020/master/data/fifa_data.csv")))
+# Pre-processing: 
+for (i in c(3,6,7,10:71)) {
+  fifa_players[,i]<-as.numeric((fifa_players[,i]))
+}
+fifa<-na.omit(fifa_players)
+fifa_players<-fifa
+fifa_players_info<-fifa[,c(1:11)] # players general info 
+fifa_players_attribures<-fifa[,c(1,12:45, 6)] # players different skills. Add overall
+fifa_players_positions<-fifa[,c(1,46:72,6)] # players ability at different positions . Add overall 
+```
+
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+
+## Q2. Scouting Report (25 pt)
+
+You are in charge of the scouting division. The goal of this division is to follow players' potential and overall ability, and identify undervalued players - that is, players whose current value is lower compared to what would be expected based on their predicted future ability. 
+
+a. Your boss wants to fly abroad to recruit promising players. Use the *rworldmap* package to display the world map and color each country based on the *total number of players* from this nationality. 
+
+b. Quantity may not guarantee quality. Repeat the above analysis but this time display a world map where each country is colored by the *average overall quality* of players. Find an under-represented country you'd recommend to travel to (i.e. a country with few players with high overall average quality). 
+
+c. Show the *average overall* ability by *age* of all players, for players 35 years old or younger
+
+d. Make a graph showing the *average difference* between a player's overall ability to potential ability as a function of age, up to age 35. At what ages should we expect to find players for future development based on this graph?  
+
+e. We are seeking young (age <=21) players with high Overall ability (>85). Show a scatter plot of these players comparing their *Potential* ability (y-axis) and current salary (*Wage*, x-axis). 
+Prepare a table showing the 10 most-undervalued players, i.e. currently lowest payed compared to their potential. Calculate for each of them what is a fair salary matching their potential that you would offer to lure them away from their current club and show it in the table.
+
+
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+
+
+## Q3. Model Building (30 pt)
+In this question we try to find specific skills which can *predict* the overall players' quality. 
+We will also build graphs which will help us compare different skills.
+
+a. We are interested in finding out which skills are similar in terms of players' performance at the position. 
+Extract the 29 skills for non-goalkeeper players (Acceleration, ..., Volleys, except 'GK.*' skills). 
+Calculate the correlation between players' ability in each pair of skills and show a heatmap correlation-plot of the correlations' matrix. What two skills seem least correlated with other skills? 
+b. Consider the following six major players positions: CAM, CB, CM, RB, RW, ST and in addition the Overall players' performance. Show a correlation-plot of players' skill levels vs. their performance at the six positions + Overall performance. Find the 7 skills mostly correlated for player's Overall performance and list them in a table.
+c. Build your team by selecting six *different* players, one in each of the above positions in such a way that the players chosen are the best in their individual position. If the same player is the best at multiple positions, try to build the team in such a way that maximize the team's overall average score. Using the function `radarchart::chartJSRadar`,graph their abilities (individually for all 6 player) in a spider (radarchart) graph. See below an example for such a chart. What is your team's overall average score?
+[radar chart](https://en.wikipedia.org/wiki/Radar_chart) (also called 'spider chart')  
+d. We are interested in determining how each of the different player's abilities changes with age. 
+Repeat the analysis of question 2.c., but this time show the different skills separately. 
+Which skills peak at youngest/oldest ages?
+e. Your boss suggests that some players may be currently under-performing compared to their skill levels (possibly due to poor fit with their current Club, recent injuries, bad luck, psychological or other reasons), 
+and that acquiring them may be beneficial as they will be expected to perform better in the future. 
+Fit a multiple regression model predicting player's Overall performance based on their skill level at the 29 different skills. Find the $10$ players with the least Overall performance level compared to what would their set of skills predict, 
+and list them in a table. 
+
+
+![Example of a Spider chart](https://i1.wp.com/statsbomb.com/wp-content/uploads/2014/01/Messi2013_NPG.jpg)
+
+
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!  
+
+
+
+## Q4. Fix Problematic Plots (10 pt)
+
+The previous data-analyst of the club was fired for producing poor plots. 
+Below see a code for two bar plots that he made.
+
+a. Describe in your own words what did your predecessor try to show in each of the two plots. 
+b. Find *at least* three problematic issues with his plot, and explain them. 
+c. Fix the problematic issues above in the code below to generate new, improved plots. 
+You will get an additional *bonus* point for finding any additional problem and fixing it.  
+
+
+
+```{r}
+# A measure of category's diversity
+DIV <- function(category_vec){
+  t <- table(category_vec)
+  p <- t/sum(t)
+  return(sum(p^2))
+}
+
+cleaned_data <- fifa_players %>% select(Nationality,Club) %>% na.omit()
+
+number_of_nationality_in_club <- cleaned_data %>% group_by(Club,Nationality) %>% summarise(count = n()) %>% group_by(Club) %>% summarise(N_nation=n()) %>% arrange(desc(N_nation)) %>% mutate(Club = factor(Club,level=unique(Club)))
+
+DIV_in_club <- cleaned_data %>% group_by(Club) %>% summarise(DIV = DIV(Nationality))%>% arrange(DIV)%>% mutate(Club = factor(Club,level=unique(Club)))  # arrange(desc(DIV)) %>% 
+
+# Plot number of different nationalities in each club
+g <- ggplot(data = number_of_nationality_in_club %>% head(10),aes(x = Club,y = N_nation,color = Club))
+g + geom_bar(stat="identity")
+
+# Plot DIV (diversity?) of different nationalities in each club
+g <- ggplot(data = DIV_in_club %>% head(10),aes(x = Club,y = DIV, color = Club))
+g <- g + geom_bar(stat="identity")
+g
+```
+
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS! 
+
+
+
+## Q5. Back to the real world (10 pt)
+
+Your boss is not convinced that your analysis of the fifa18 dataset is relevant for performance in the real world. To convince her, you need to show her that the fifa18 data can predict actual performance in football. Load the fifa ranking dataset ['fifa_ranking.csv'](https://raw.githubusercontent.com/DataScienceHU/DataAnalysisR_2020/master/data/fifa_ranking.csv) which contains ranking of countries based on their actual performance in international football competitions. 
+Use the fifa18 dataset to compare the real vs. game football levels across all countries. 
+What is your conclusion regarding the relevancy of the fifa18 game dataset to the real world?
+Use your best judgment to choose the appropriate data, models, analysis and plots to support your conclusions. 
+
+
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS! 
+
