@@ -121,12 +121,24 @@ fifa_players_indicators <- fifa[,c(1,6,7,10,11)] # players general ability
 
 Q1A
 ```{r}
-hist(fifa$Overall)
+ave_ove = mean(fifa$Overall)
+med_ove = median(fifa$Overall)
+sd_ove = sd(fifa$Overall)
+tail = skewness(fifa$Overall)
+h <- hist(fifa$Overall, breaks = 10, density = 10,
+          col = "lightgray", xlab = "Overall", main = "Overall") 
+xfit <- seq(min(fifa$Overall), max(fifa$Overall), length = 40) 
+yfit <- dnorm(xfit, mean = mean(fifa$Overall), sd = sd(fifa$Overall)) 
+yfit <- yfit * diff(h$mids[1:2]) * length(fifa$Overall) 
+lines(xfit, yfit, col = "black", lwd = 2)
+
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q1B
 ```{r}
-hist(fifa$Overall)
+fifa %>% ggplot(aes(x=Continent, y=Overall, fill=Continent)) +
+  geom_boxplot()
+
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q1C
@@ -201,21 +213,22 @@ Q2B
 ```{r}
 filter_2B <- filter(fifa,Age <= 35)
 group_2B <- group_by(filter_2B,Age)
-summ_2B <- summarize(group_2B, ave_def_pot_over=mean(Overall - Potential))
+summ_2B <- summarize(group_2B, ave_def_pot_over=-mean(Overall - Potential))
 p_2B <- ggplot(summ_2B, aes(x = Age, y = ave_def_pot_over))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="ave_def_pot_over")
 p_2B
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q2C
 ```{r}
-filter_2C <- filter(fifa,Age < 21)
-filter_2C1 <- filter(fifa,Potential > 70)
-p_2C <- ggplot(filter_2C1, aes(x = Potential, y = Value))+geom_point(data = filter_2C, color = "red") + labs(x="Potential", y="Value")+ geom_smooth(method = "lm", se = FALSE)
-x = lm(filter_2C1$Potential~filter_2C1$Value)
-summary(x)
-print(p_2C)
-group_2B <- group_by(filter_2B,Age)
-summ_2B <- summarize(group_2B, ave_def_pot_over=mean(Overall - Potential))
+filter_2C <- filter(fifa,Age < 21 & Potential > 70)
+filter_2C$reg_val_pot <- predict(lm(Potential ~ Value, data = filter_2C))
+ggplot(data = filter_2C, aes(x = Potential, y = Value, color="paired")) +  
+  geom_point() + 
+  geom_line(aes(y = reg_val_pot)) + 
+  geom_text(aes(label=Name), size = 3, hjust='bottom', nudge_x = 0.05 ) +
+  theme_gray() + theme(legend.position = c(0.94, 0.9)) +
+  ggtitle('Ratings of Value as a function of Potential')
+
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q2D
@@ -226,6 +239,12 @@ sPDF <- joinCountryData2Map( summ_2D, joinCode = "NAME"
                               , nameJoinColumn = "med_pot")
 par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
 mapCountryData( sPDF, nameColumnToPlot="med_pot" )
+data(countryExData)
+countryExData[1:250,1:5]
+
+#Using country2Region to calculate mean ENVHEALTH in Stern regions.
+par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+mapByRegion( fifa, nameDataColumn="Potential", joinCode="Name", nameJoinColumn="Nationality", regionType="Stern", FUN="mean")
 
 ```
 
@@ -288,6 +307,7 @@ and list them in a table.
 
 Q3A
 ```{r}
+cor_met_3A_pos <- cor(fifa_players_positions[2:27],fifa_players_positions[2:27])
 
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
