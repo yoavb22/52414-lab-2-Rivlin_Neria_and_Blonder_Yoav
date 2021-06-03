@@ -222,7 +222,7 @@ Q2C
 ```{r}
 filter_2C <- filter(fifa,Age < 21 & Potential > 70)
 filter_2C$reg_val_pot <- predict(lm(Potential ~ Value, data = filter_2C))
-ggplot(data = filter_2C, aes(x = Potential, y = Value, color="paired")) +  
+ggplot(data = filter_2C, aes(x = Potential, y = Value)) +  
   geom_point() + 
   geom_line(aes(y = reg_val_pot)) + 
   geom_text(aes(label=Name), size = 3, hjust='bottom', nudge_x = 0.05 ) +
@@ -230,6 +230,8 @@ ggplot(data = filter_2C, aes(x = Potential, y = Value, color="paired")) +
   ggtitle('Ratings of Value as a function of Potential')
 
 ```
+
+
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q2D
 ```{r}
@@ -308,6 +310,8 @@ and list them in a table.
 Q3A
 ```{r}
 cor_met_3A_pos <- cor(fifa_players_positions[2:27],fifa_players_positions[2:27])
+heatmap(cor_met_3A_pos)
+
 
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
@@ -315,24 +319,47 @@ Q3B
 ```{r}
 new_table_3B <- left_join(fifa_players_attribures, fifa_players_indicators ,by=c("ID"="ID" ,"Overall"="Overall"))
 cor_met_3B <- cor(new_table_3B[2:35],new_table_3B[36:39])
+corrplot(cor_met_3B, method="pie",tl.cex =0.5,col=c("black", "white"),
+         bg="lightblue")
+
 sum_cor <- apply(cor_met_3B,1,sum)
 ave_cor <- sum_cor/4
+sort_top_ave <- sort(ave_cor)
+top_10_average_cor_skill <-sort_top_ave[34:25]
+top_10_table <- data.frame(top_10_average_cor_skill)
 
-q_1_E_2 <- cor_met_3B %>% 
-  arrange(desc(-ave_age)) %>% 
-  head(10)
-print(q_1_E_2)
 
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q3C
 ```{r}
+vec_name <- names(fifa_players_positions)
+m = matrix(0,27,30)
+new_data3C <- data.frame(m)
+names(new_data3C) <- c(vec_name)
+
+for (i in 2:27){
+  new_data3C[i-1,] <-  fifa_players_positions %>% 
+  arrange(desc(fifa_players_positions[i])) %>% 
+  head(1)
+}
+GK_filter <- filter(fifa_players_positions,Preferred.Positions=="GK ")
+new_data3C[27,] <-  GK_filter %>% 
+  arrange(desc(GK_filter[,29])) %>% 
+  head(1)
+uniq_palyer  <-  new_data3C %>% 
+                    distinct(ID, .keep_all = TRUE) 
+
+new_data3C <- left_join(new_data3C, fifa[1:2] ,by=c("ID"="ID"))
 
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q3D
 ```{r}
-
+group_2A <- group_by(fifa_players_attribures,Age)
+summ_2B <- summarize(group_2A, ave_pot=mean(Potential))
+p_2A <- ggplot(summ_2B, aes(x = Age, y = ave_pot))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="ave_pot")
+p_2A
 
 ```
 
