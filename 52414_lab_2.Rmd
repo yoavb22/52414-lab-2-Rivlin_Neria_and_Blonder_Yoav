@@ -188,6 +188,63 @@ e. Repeat the above analysis but this time display a world map where each countr
 
 
 
+Q2A
+```{r}
+filter_2A <- filter(fifa,Age <= 35)
+group_2A <- group_by(filter_2A,Age)
+summ_2B <- summarize(group_2A, ave_pot=mean(Potential))
+p_2A <- ggplot(summ_2B, aes(x = Age, y = ave_pot))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="ave_pot")
+p_2A
+```
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+Q2B
+```{r}
+filter_2B <- filter(fifa,Age <= 35)
+group_2B <- group_by(filter_2B,Age)
+summ_2B <- summarize(group_2B, ave_def_pot_over=mean(Overall - Potential))
+p_2B <- ggplot(summ_2B, aes(x = Age, y = ave_def_pot_over))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="ave_def_pot_over")
+p_2B
+```
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+Q2C
+```{r}
+filter_2C <- filter(fifa,Age < 21)
+filter_2C1 <- filter(fifa,Potential > 70)
+p_2C <- ggplot(filter_2C1, aes(x = Potential, y = Value))+geom_point(data = filter_2C, color = "red") + labs(x="Potential", y="Value")+ geom_smooth(method = "lm", se = FALSE)
+x = lm(filter_2C1$Potential~filter_2C1$Value)
+summary(x)
+print(p_2C)
+group_2B <- group_by(filter_2B,Age)
+summ_2B <- summarize(group_2B, ave_def_pot_over=mean(Overall - Potential))
+```
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+Q2D
+```{r}
+group_2D <- group_by(fifa,Nationality)
+summ_2D <- summarize(group_2D, med_pot=median(Potential))
+sPDF <- joinCountryData2Map( summ_2D, joinCode = "NAME"
+                              , nameJoinColumn = "med_pot")
+par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+mapCountryData( sPDF, nameColumnToPlot="med_pot" )
+
+```
+
+
+
+Q2E
+```{r}
+group_2E <- group_by(fifa,Nationality)
+summ_2E <- summarize(group_2E, med_pot_val=median(Potential)/median(Value))
+summ_2E$med_pot_val = round(summ_2E$med_pot_val,5)
+filter_2E <- filter(summ_2E,med_pot_val != Inf)
+sPDF_2 <- joinCountryData2Map( filter_2E, joinCode = "NAME"
+                              , nameJoinColumn = "med_pot_val")
+par(mai=c(0,0,0.2,0),xaxs="i",yaxs="i")
+mapCountryData( sPDF_2, nameColumnToPlot="med_pot_val" )
+
+
+```
+
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 
 
@@ -229,8 +286,44 @@ and list them in a table.
 ![Example of a Spider chart](https://i1.wp.com/statsbomb.com/wp-content/uploads/2014/01/Messi2013_NPG.jpg)
 
 
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+Q3A
+```{r}
 
+```
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+Q3B
+```{r}
+new_table_3B <- left_join(fifa_players_attribures, fifa_players_indicators ,by=c("ID"="ID" ,"Overall"="Overall"))
+cor_met_3B <- cor(new_table_3B[2:35],new_table_3B[36:39])
+sum_cor <- apply(cor_met_3B,1,sum)
+ave_cor <- sum_cor/4
+
+q_1_E_2 <- cor_met_3B %>% 
+  arrange(desc(-ave_age)) %>% 
+  head(10)
+print(q_1_E_2)
+
+```
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+Q3C
+```{r}
+
+```
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+Q3D
+```{r}
+
+
+```
+
+
+
+Q3E
+```{r}
+
+
+
+```
 
 
 ## Q4. Fix Problematic Plots (10 pt)
