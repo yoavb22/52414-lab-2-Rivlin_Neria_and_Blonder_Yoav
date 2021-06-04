@@ -143,7 +143,10 @@ fifa %>% ggplot(aes(x=Continent, y=Overall, fill=Continent)) +
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q1C
 ```{r}
-hist(fifa$Overall)
+ggplot(fifa, aes(x=Value))+
+  geom_density(color="darkblue", fill="lightblue")
+ggplot(fifa, aes(x=log(Value)))+
+  geom_density(color="darkblue", fill="lightblue")
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q1D
@@ -221,13 +224,19 @@ PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q2C
 ```{r}
 filter_2C <- filter(fifa,Age < 21 & Potential > 70)
-filter_2C$reg_val_pot <- predict(lm(Potential ~ Value, data = filter_2C))
+reg_val_pot <- lm(Potential ~ Value, data = filter_2C)
 ggplot(data = filter_2C, aes(x = Potential, y = Value)) +  
-  geom_point() + 
-  geom_line(aes(y = reg_val_pot)) + 
-  geom_text(aes(label=Name), size = 3, hjust='bottom', nudge_x = 0.05 ) +
+  geom_point()  + geom_text(aes(label=Name), size = 3, hjust='bottom', nudge_x = 0.05, col="red") + geom_smooth(method="lm", se=TRUE, fullrange=FALSE, level=0.95) + 
   theme_gray() + theme(legend.position = c(0.94, 0.9)) +
   ggtitle('Ratings of Value as a function of Potential')
+new_table2c <- select(filter_2C,Name,Value,Potential)
+reg_2C <- lm(data=new_table2c,Potential ~ Value)
+resid <- resid(reg_2C) #List of residuals
+new_table2c$resid <- resid
+new_table2c1 <- new_table2c %>% 
+  arrange(desc(resid)) %>% 
+  head(10)
+print(new_table2c1)
 
 ```
 
@@ -356,10 +365,13 @@ new_data3C <- left_join(new_data3C, fifa[1:2] ,by=c("ID"="ID"))
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q3D
 ```{r}
-group_2A <- group_by(fifa_players_attribures,Age)
-summ_2B <- summarize(group_2A, ave_pot=mean(Potential))
-p_2A <- ggplot(summ_2B, aes(x = Age, y = ave_pot))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="ave_pot")
-p_2A
+group_3D <- group_by(fifa,Age)
+for (i in 12:45){
+  summ_3D <- summarize(group_3D, i=mean(group_3D[i]))
+p_3D <- p_3D + ggplot(summ_2B, aes(x = Age, y = ave_pot))+geom_point(data = summ_3D) + labs(x="Age", y="ave_pot")
+p_3D
+}
+
 
 ```
 
@@ -409,5 +421,17 @@ g <- g + geom_bar(stat="identity")
 g
 ```
 
+Q4A
 
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+Q4B
+He dot clean the data he still have empty thing
+the color of bars is same and only the line diffrent and its not clear
+you cant read the text under plot
+the plot dont have a title
+the axis y dont have a informtiv 
+Q4C
+```{r}
+
+
+```
