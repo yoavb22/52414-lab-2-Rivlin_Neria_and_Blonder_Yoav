@@ -224,19 +224,25 @@ PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q2C
 ```{r}
 filter_2C <- filter(fifa,Age < 21 & Potential > 70)
-reg_val_pot <- lm(Potential ~ Value, data = filter_2C)
-ggplot(data = filter_2C, aes(x = Potential, y = Value)) +  
-  geom_point()  + geom_text(aes(label=Name), size = 3, hjust='bottom', nudge_x = 0.05, col="red") + geom_smooth(method="lm", se=TRUE, fullrange=FALSE, level=0.95) + 
-  theme_gray() + theme(legend.position = c(0.94, 0.9)) +
-  ggtitle('Ratings of Value as a function of Potential')
-new_table2c <- select(filter_2C,Name,Value,Potential)
+new_table2c <- select(filter_2C,Name,Age,Overall,Potential,Value)
+reg_val_pot <- lm(Potential ~ Value, data = new_table2c)
 reg_2C <- lm(data=new_table2c,Potential ~ Value)
+sum_red_2C <- summary(reg_2C)
+intercept <- sum_red_2C$coefficients[1]
+slope <- sum_red_2C$coefficients[2]
 resid <- resid(reg_2C) #List of residuals
-new_table2c$resid <- resid
+new_table2c$real_value <- resid
 new_table2c1 <- new_table2c %>% 
-  arrange(desc(resid)) %>% 
+  arrange(desc(real_value)) %>% 
   head(10)
+new_table2c2 <- new_table2c %>% 
+  arrange(desc(real_value))
+new_table2c1$real_value <- (new_table2c1$Potential*(1/slope))-intercept
 print(new_table2c1)
+p2C <- ggplot(data = new_table2c2, aes(x = Potential, y = Value))+ geom_text(aes(label=Name),check_overlap = TRUE, size = 2.5, hjust='bottom', nudge_x = 0.05)+ geom_smooth(method="lm", se=TRUE, fullrange=FALSE, level=0.95) +  theme_gray() + theme(legend.position = c(0.94, 0.9)) + ggtitle('Ratings of Value as a function of Potential')
+print(p2C)
+
+
 
 ```
 
@@ -328,8 +334,8 @@ Q3B
 ```{r}
 new_table_3B <- left_join(fifa_players_attribures, fifa_players_indicators ,by=c("ID"="ID" ,"Overall"="Overall"))
 cor_met_3B <- cor(new_table_3B[2:35],new_table_3B[36:39])
-corrplot(cor_met_3B, method="pie",tl.cex =0.5,col=c("black", "white"),
-         bg="lightblue")
+corrplot(cor_met_3B, method="pie",tl.cex =0.5,tl. col=c("black", "white"),
+         bg="lightblue")+ theme(axis.text.x = element_text(face = "bold", size = 9, angle = -90, hjust = 0))
 
 sum_cor <- apply(cor_met_3B,1,sum)
 ave_cor <- sum_cor/4
@@ -348,19 +354,28 @@ new_data3C <- data.frame(m)
 names(new_data3C) <- c(vec_name)
 
 for (i in 2:27){
-  new_data3C[i-1,] <-  fifa_players_positions %>% 
-  arrange(desc(fifa_players_positions[i])) %>% 
+  filter_data <- filter(fifa_players_positions,
+                        grepl(vec_name[i],Preferred.Positions)==TRUE)
+  new_data3C[i-1,] <-  filter_data %>% 
+  arrange(desc(filter_data[i])) %>% 
   head(1)
 }
 GK_filter <- filter(fifa_players_positions,Preferred.Positions=="GK ")
-new_data3C[27,] <-  GK_filter %>% 
+new_data3C[53,] <-  GK_filter %>% 
   arrange(desc(GK_filter[,29])) %>% 
   head(1)
 uniq_palyer  <-  new_data3C %>% 
                     distinct(ID, .keep_all = TRUE) 
-
-new_data3C <- left_join(new_data3C, fifa[1:2] ,by=c("ID"="ID"))
-
+top_11_player <- uniq_palyer %>% 
+  arrange(desc(uniq_palyer[,29])) %>% 
+  head(11)
+top_11_player <- left_join(top_11_player, fifa[1:2] ,by=c("ID"="ID"))
+top_11_player <-select(top_11_player,Name,)
+  filter_data <- filter(fifa_players_positions,
+                        grepl(vec_name[2],Preferred.Positions)==TRUE)
+  new_data3C[1,] <-  filter_data %>% 
+  arrange(desc(filter_data[2])) %>% 
+  head(1)
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q3D
@@ -425,7 +440,7 @@ Q4A
 
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q4B
-He dot clean the data he still have empty thing
+He dont clean the data he still have 'NA' column
 the color of bars is same and only the line diffrent and its not clear
 you cant read the text under plot
 the plot dont have a title
@@ -433,5 +448,22 @@ the axis y dont have a informtiv
 Q4C
 ```{r}
 
+cleaned_data <- fifa_players %>% select(Nationality,Club) %>% na.omit()
+
+number_of_nationality_in_club <- cleaned_data%>%filter(Club!="") %>% group_by(Club, Nationality) %>% summarise(count = n()) %>% group_by(Club) %>% summarise(N_nation=n())  %>% arrange(desc(N_nation))%>% mutate(Club = factor(Club, level=unique(Club)))
+
+DIV_in_club <- cleaned_data %>%filter(Club!="")%>% group_by(Club) %>% summarise(DIV = DIV(Nationality)) %>%filter(Club!="")%>% arrange(DIV)%>%mutate(Club = factor(Club,level=unique(Club)))  # arrange(desc(DIV)) %>% 
+
+# Plot number of different nationalities in each club
+g <- ggplot(data = number_of_nationality_in_club %>% head(8), aes(x = Club, y = N_nation,fill = Club))
+g + geom_bar(stat="identity")+ theme(axis.text.x = element_text(face = "bold", size = 9, angle = -90, hjust = 0)) + ylab('new_title_y') +
+labs(title="new_title")
+g
+
+# Plot DIV (diversity?) of different nationalities in each club
+g <- ggplot(data = DIV_in_club %>% head(12),aes(x = Club,y = DIV, fill = Club))
+g <- g + geom_bar(stat="identity") + theme(axis.text.x = element_text(face = "bold", size = 9, angle = -90, hjust = 0)) + ylab('new_title_y') +
+labs(title="new_title")
+g
 
 ```
