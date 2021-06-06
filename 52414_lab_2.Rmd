@@ -126,7 +126,7 @@ med_ove = median(fifa$Overall)
 sd_ove = sd(fifa$Overall)
 tail = skewness(fifa$Overall)
 h <- hist(fifa$Overall, breaks = 10, density = 10,
-          col = "lightgray", xlab = "Overall", main = "Overall") 
+          col = "lightgray", xlab = "Overall", main = "histogram of overall") 
 xfit <- seq(min(fifa$Overall), max(fifa$Overall), length = 40) 
 yfit <- dnorm(xfit, mean = mean(fifa$Overall), sd = sd(fifa$Overall)) 
 yfit <- yfit * diff(h$mids[1:2]) * length(fifa$Overall) 
@@ -137,16 +137,16 @@ PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q1B
 ```{r}
 fifa %>% ggplot(aes(x=Continent, y=Overall, fill=Continent)) +
-  geom_boxplot()
+  geom_boxplot()+labs(title = "boxplot of overall gruop by continent")
 
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q1C
 ```{r}
 ggplot(fifa, aes(x=Value))+
-  geom_density(color="darkblue", fill="lightblue")
+  geom_density(color="darkblue", fill="lightblue")+labs(title = "density of Value")
 ggplot(fifa, aes(x=log(Value)))+
-  geom_density(color="darkblue", fill="lightblue")
+  geom_density(color="darkblue", fill="lightblue")+labs(title = "density of log Value")
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q1D
@@ -208,7 +208,7 @@ Q2A
 filter_2A <- filter(fifa,Age <= 35)
 group_2A <- group_by(filter_2A,Age)
 summ_2B <- summarize(group_2A, ave_pot=mean(Potential))
-p_2A <- ggplot(summ_2B, aes(x = Age, y = ave_pot))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="ave_pot")
+p_2A <- ggplot(summ_2B, aes(x = Age, y = ave_pot))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="average potential",title = "average potential to age")
 p_2A
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
@@ -217,7 +217,7 @@ Q2B
 filter_2B <- filter(fifa,Age <= 35)
 group_2B <- group_by(filter_2B,Age)
 summ_2B <- summarize(group_2B, ave_def_pot_over=-mean(Overall - Potential))
-p_2B <- ggplot(summ_2B, aes(x = Age, y = ave_def_pot_over))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="ave_def_pot_over")
+p_2B <- ggplot(summ_2B, aes(x = Age, y = ave_def_pot_over))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="average diffrent of potential and overall",title = "average diffrent of potential and overall to age")
 p_2B
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
@@ -239,11 +239,11 @@ new_table2c2 <- new_table2c %>%
   arrange(desc(real_value))
 new_table2c1$real_value <- (new_table2c1$Potential*(1/slope))-intercept
 print(new_table2c1)
-p2C <- ggplot(data = new_table2c2, aes(x = Potential, y = Value))+ geom_text(aes(label=Name),check_overlap = TRUE, size = 2.5, hjust='bottom', nudge_x = 0.05)+ geom_smooth(method="lm", se=TRUE, fullrange=FALSE, level=0.95) +  theme_gray() + theme(legend.position = c(0.94, 0.9)) + ggtitle('Ratings of Value as a function of Potential')
-print(p2C)
+p2C <- ggplot(data = new_table2c2, aes(x = Potential, y = Value))+ geom_text(aes(label=Name), size = 2.5, hjust='bottom',check_overlap = TRUE, nudge_x = 0.05)+ geom_smooth(method="lm", se=TRUE, fullrange=FALSE, level=0.95) +  theme_gray() + theme(legend.position = c(0.94, 0.9)) + ggtitle('Ratings of Value as a function of Potential') + geom_text(data =new_table2c1, aes(label=Name), size = 3, nudge_x = 0.05,col="red")
+p2C
+p2C
 
-
-
+#,check_overlap = TRUE
 ```
 
 
@@ -325,19 +325,27 @@ and list them in a table.
 Q3A
 ```{r}
 cor_met_3A_pos <- cor(fifa_players_positions[2:27],fifa_players_positions[2:27])
-heatmap(cor_met_3A_pos)
 
+P3A <- ggheatmap(cor_met_3A_pos,title="heat map of fifa players positions")
+P3A
+new_table3A <- fifa_players_attribures[2:35]
+new_table3A[,12:16] <- NULL
 
+cor_met_3A1_pos <- cor(fifa_players_positions[2:27],
+                       new_table3A[1:29])
+P3A1 <- heatmap(cor_met_3A1_pos)
+#P3A1+title("heat map of fifa players positions of players skills")
+P3A1
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q3B
 ```{r}
 new_table_3B <- left_join(fifa_players_attribures, fifa_players_indicators ,by=c("ID"="ID" ,"Overall"="Overall"))
-cor_met_3B <- cor(new_table_3B[2:35],new_table_3B[36:39])
-corrplot(cor_met_3B, method="pie",tl.cex =0.5,tl. col=c("black", "white"),
-         bg="lightblue")+ theme(axis.text.x = element_text(face = "bold", size = 9, angle = -90, hjust = 0))
+cor_met_3B <- cor(new_table_3B[36:39],new_table_3B[2:35])
+corrplot(cor_met_3B, method="circle",tl.cex =1,col=c("black", "white"),
+         bg="lightblue")+ theme(axis.text.x = element_text(face = "bold", size = 9, angle = -90, hjust = 0))+title("Cor plot of fifa players skills",xlab="player skills",ylab="player indicators")
 
-sum_cor <- apply(cor_met_3B,1,sum)
+sum_cor <- apply(cor_met_3B,2,sum)
 ave_cor <- sum_cor/4
 sort_top_ave <- sort(ave_cor)
 top_10_average_cor_skill <-sort_top_ave[34:25]
@@ -349,16 +357,62 @@ PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q3C
 ```{r}
 vec_name <- names(fifa_players_positions)
-m = matrix(0,27,30)
+m = matrix(0,53,30)
 new_data3C <- data.frame(m)
 names(new_data3C) <- c(vec_name)
 
 for (i in 2:27){
-  filter_data <- filter(fifa_players_positions,
-                        grepl(vec_name[i],Preferred.Positions)==TRUE)
-  new_data3C[i-1,] <-  filter_data %>% 
-  arrange(desc(filter_data[i])) %>% 
+ # filter_data <- filter(fifa_players_positions,
+         #               grepl(vec_name[i],Preferred.Positions)==TRUE)
+  new_data3C[(2*(i)-1):(2*(i)),] <-  fifa_players_positions %>% 
+  arrange(desc(fifa_players_positions[i])) %>% 
+  head(2)
+}
+GK_filter <- filter(fifa_players_positions,Preferred.Positions=="GK ")
+new_data3C[53,] <-  GK_filter %>% 
+  arrange(desc(GK_filter[,29])) %>% 
   head(1)
+uniq_palyer  <-  new_data3C %>% 
+                    distinct(ID, .keep_all = TRUE) 
+top_11_player <- uniq_palyer %>% 
+  arrange(desc(uniq_palyer[,29])) %>% 
+  head(11)
+top_11_player <- left_join(top_11_player, fifa[1:2] ,by=c("ID"="ID"))
+top_11_player <-select(top_11_player,Name,Overall)
+top_6_player <- filter(fifa,Name =="Cristiano Ronaldo"|Name=="L. Messi"|Name=="M. Neuer"|Name=="R. Lewandowski"|Name=="Sergio Ramos"|Name=="T. Kroos")
+top_6_player_10_skills <- select(top_6_player,Name,names(top_10_average_cor_skill))
+vec_nu = top_6_player_10_skills[1,2:11]
+vec_nam = names(top_10_average_cor_skill[2:11])
+chartJSRadar(scores=vec_nu,labs = names(vec_nu))
+
+  #filter_data <- filter(fifa_players_positions,
+ #                       grepl(vec_name[2],Preferred.Positions)==TRUE)
+ # new_data3C[1,] <-  filter_data %>% 
+ # arrange(desc(filter_data[2])) %>% 
+#  head(1)
+
+```
+PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+Q3D
+```{r}
+vec_name_3D <- names(fifa)
+group_3D <- group_by(fifa,Age)
+for (i in 12:45){
+  summ_3D <-summ_3D + summarize(group_3D, y=mean(group_by[,i]))
+#ggplot(summ_2B, aes(x = Age, y = y))+geom_point(data = summ_3D) + labs(x="Age", y="ave_pot")
+}
+summ_3D <- summarize(group_3D, tt=mean((fifa[,12])))
+ggplot(summ_3D, aes(x = Age, y = tt))+geom_point(data = summ_3D) + labs(x="Age", y="ave_pot")
+new_data3D[,(i-11)] <-
+
+vec_name_3D <- names(fifa)
+m3D = matrix(0,29,34)
+new_data3D <- data.frame(m3D)
+names(new_data3D) <- c(vec_name_3D[12:45])
+vec_age <- c(seq(16,35))
+group_3D <- group_by(fifa,Age)
+for (i in 12:45){
+    x=(summarise(group_3D, mean(as.factor(vec_name_3D[i]))))
 }
 GK_filter <- filter(fifa_players_positions,Preferred.Positions=="GK ")
 new_data3C[53,] <-  GK_filter %>% 
@@ -376,17 +430,10 @@ top_11_player <-select(top_11_player,Name,)
   new_data3C[1,] <-  filter_data %>% 
   arrange(desc(filter_data[2])) %>% 
   head(1)
-```
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
-Q3D
-```{r}
-group_3D <- group_by(fifa,Age)
-for (i in 12:45){
-  summ_3D <- summarize(group_3D, i=mean(group_3D[i]))
-p_3D <- p_3D + ggplot(summ_2B, aes(x = Age, y = ave_pot))+geom_point(data = summ_3D) + labs(x="Age", y="ave_pot")
-p_3D
-}
-
+  
+  
+    new_data3D[(1),] <-  group_3D %>% 
+  summarise(group_3D,mean(group_3D[i,]))[2]
 
 ```
 
@@ -394,7 +441,15 @@ p_3D
 
 Q3E
 ```{r}
-
+new_table3E <- select(fifa,Name,Overall,Age,Wage)
+reg_Ov_Ag_Wa <- lm(Overall ~ Age+Wage, data = new_table3E)
+sum_red_3E <- summary(reg_Ov_Ag_Wa)
+resid <- resid(sum_red_3E) #List of residuals
+new_table3E$resid <- resid
+new_table3E1 <- new_table3E %>% 
+  arrange(desc(resid)) %>% 
+  head(10)
+new_table3E1
 
 
 ```
