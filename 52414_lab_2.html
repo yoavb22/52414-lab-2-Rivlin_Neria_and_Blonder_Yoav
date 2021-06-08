@@ -492,21 +492,22 @@ top_10_average_cor_skill &lt;-sort_top_ave[34:25]
 top_10_table &lt;- data.frame(top_10_average_cor_skill)</code></pre>
 <p>PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS! Q3C</p>
 <pre class="r"><code>vec_name &lt;- names(fifa_players_positions)
-m = matrix(0,53,30)
+m = matrix(0,1,30)
 new_data3C &lt;- data.frame(m)
 names(new_data3C) &lt;- c(vec_name)
-
 for (i in 2:27){
- # filter_data &lt;- filter(fifa_players_positions,
-         #               grepl(vec_name[i],Preferred.Positions)==TRUE)
-  new_data3C[(2*(i)-1):(2*(i)),] &lt;-  fifa_players_positions %&gt;% 
+  new_data &lt;-  fifa_players_positions %&gt;% 
   arrange(desc(fifa_players_positions[i])) %&gt;% 
-  head(2)
+  head(10)
+  new_data &lt;- filter(new_data,new_data[i]==new_data[1,i])
+  new_data3C &lt;- rbind(new_data3C,new_data)
 }
+new_data3C &lt;- new_data3C[2:43,]
 GK_filter &lt;- filter(fifa_players_positions,Preferred.Positions==&quot;GK &quot;)
-new_data3C[53,] &lt;-  GK_filter %&gt;% 
+GK_filter &lt;-  GK_filter %&gt;% 
   arrange(desc(GK_filter[,29])) %&gt;% 
   head(1)
+new_data3C &lt;- rbind(new_data3C,GK_filter)
 uniq_palyer  &lt;-  new_data3C %&gt;% 
                     distinct(ID, .keep_all = TRUE) 
 top_11_player &lt;- uniq_palyer %&gt;% 
@@ -514,19 +515,14 @@ top_11_player &lt;- uniq_palyer %&gt;%
   head(11)
 top_11_player &lt;- left_join(top_11_player, fifa[1:2] ,by=c(&quot;ID&quot;=&quot;ID&quot;))
 top_11_player &lt;-select(top_11_player,Name,Overall)
-top_6_player &lt;- filter(fifa,Name ==&quot;Cristiano Ronaldo&quot;|Name==&quot;L. Messi&quot;|Name==&quot;M. Neuer&quot;|Name==&quot;R. Lewandowski&quot;|Name==&quot;Sergio Ramos&quot;|Name==&quot;T. Kroos&quot;)
+top_6_player &lt;- filter(fifa,Name ==&quot;Cristiano Ronaldo&quot;|Name==&quot;L. Messi&quot;|Name==&quot;M. Neuer&quot;|Name==&quot;A. Vidal&quot;|Name==&quot;Sergio Ramos&quot;|Name==&quot;T. Kroos&quot;)
 top_6_player_10_skills &lt;- select(top_6_player,Name,names(top_10_average_cor_skill))
 radarDF &lt;- gather(top_6_player_10_skills, key=Label, value=Score, -Name) %&gt;%
   spread(key=Name, value=Score)
 
 chartJSRadar(scores = radarDF, maxScale = 100, showToolTipLabel = TRUE)</code></pre>
-<canvas id="htmlwidget-57763c12c19950106e73" class="chartJSRadar html-widget" width="672" height="480"></canvas>
-<script type="application/json" data-for="htmlwidget-57763c12c19950106e73">{"x":{"data":{"labels":["Ball.control","Composure","Curve","Long.passing","Long.shots","Reactions","Short.passing","Shot.power","Vision","Volleys"],"datasets":[{"label":"Cristiano Ronaldo","data":[93,95,81,77,92,96,83,94,85,88],"backgroundColor":"rgba(255,0,0,0.2)","borderColor":"rgba(255,0,0,0.8)","pointBackgroundColor":"rgba(255,0,0,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(255,0,0,0.8)"},{"label":"L. Messi","data":[95,96,89,87,88,95,88,85,90,85],"backgroundColor":"rgba(0,255,0,0.2)","borderColor":"rgba(0,255,0,0.8)","pointBackgroundColor":"rgba(0,255,0,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(0,255,0,0.8)"},{"label":"M. Neuer","data":[48,70,14,59,16,85,55,25,70,11],"backgroundColor":"rgba(0,0,255,0.2)","borderColor":"rgba(0,0,255,0.8)","pointBackgroundColor":"rgba(0,0,255,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(0,0,255,0.8)"},{"label":"R. Lewandowski","data":[89,87,77,65,83,91,83,88,78,87],"backgroundColor":"rgba(255,255,0,0.2)","borderColor":"rgba(255,255,0,0.8)","pointBackgroundColor":"rgba(255,255,0,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(255,255,0,0.8)"},{"label":"Sergio Ramos","data":[84,80,73,72,55,85,78,79,63,66],"backgroundColor":"rgba(255,0,255,0.2)","borderColor":"rgba(255,0,255,0.8)","pointBackgroundColor":"rgba(255,0,255,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(255,0,255,0.8)"},{"label":"T. Kroos","data":[89,85,85,93,90,86,90,87,88,82],"backgroundColor":"rgba(0,255,255,0.2)","borderColor":"rgba(0,255,255,0.8)","pointBackgroundColor":"rgba(0,255,255,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(0,255,255,0.8)"}]},"options":{"responsive":true,"title":{"display":false,"text":null},"scale":{"ticks":{"max":100,"min":0},"pointLabels":{"fontSize":18}},"tooltips":{"enabled":true,"mode":"label"},"legend":{"display":true}}},"evals":[],"jsHooks":[]}</script>
-<pre class="r"><code>  #filter_data &lt;- filter(fifa_players_positions,
- #                       grepl(vec_name[2],Preferred.Positions)==TRUE)
- # new_data3C[1,] &lt;-  filter_data %&gt;% 
- # arrange(desc(filter_data[2])) %&gt;% 
-#  head(1)</code></pre>
+<canvas id="htmlwidget-5dec016df0c2ba730af1" class="chartJSRadar html-widget" width="672" height="480"></canvas>
+<script type="application/json" data-for="htmlwidget-5dec016df0c2ba730af1">{"x":{"data":{"labels":["Ball.control","Composure","Curve","Long.passing","Long.shots","Reactions","Short.passing","Shot.power","Vision","Volleys"],"datasets":[{"label":"A. Vidal","data":[83,86,76,82,85,89,84,86,80,78],"backgroundColor":"rgba(255,0,0,0.2)","borderColor":"rgba(255,0,0,0.8)","pointBackgroundColor":"rgba(255,0,0,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(255,0,0,0.8)"},{"label":"Cristiano Ronaldo","data":[93,95,81,77,92,96,83,94,85,88],"backgroundColor":"rgba(0,255,0,0.2)","borderColor":"rgba(0,255,0,0.8)","pointBackgroundColor":"rgba(0,255,0,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(0,255,0,0.8)"},{"label":"L. Messi","data":[95,96,89,87,88,95,88,85,90,85],"backgroundColor":"rgba(0,0,255,0.2)","borderColor":"rgba(0,0,255,0.8)","pointBackgroundColor":"rgba(0,0,255,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(0,0,255,0.8)"},{"label":"M. Neuer","data":[48,70,14,59,16,85,55,25,70,11],"backgroundColor":"rgba(255,255,0,0.2)","borderColor":"rgba(255,255,0,0.8)","pointBackgroundColor":"rgba(255,255,0,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(255,255,0,0.8)"},{"label":"Sergio Ramos","data":[84,80,73,72,55,85,78,79,63,66],"backgroundColor":"rgba(255,0,255,0.2)","borderColor":"rgba(255,0,255,0.8)","pointBackgroundColor":"rgba(255,0,255,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(255,0,255,0.8)"},{"label":"T. Kroos","data":[89,85,85,93,90,86,90,87,88,82],"backgroundColor":"rgba(0,255,255,0.2)","borderColor":"rgba(0,255,255,0.8)","pointBackgroundColor":"rgba(0,255,255,0.8)","pointBorderColor":"#fff","pointHoverBackgroundColor":"#fff","pointHoverBorderColor":"rgba(0,255,255,0.8)"}]},"options":{"responsive":true,"title":{"display":false,"text":null},"scale":{"ticks":{"max":100,"min":0},"pointLabels":{"fontSize":18}},"tooltips":{"enabled":true,"mode":"label"},"legend":{"display":true}}},"evals":[],"jsHooks":[]}</script>
 <p>PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS! Q3D</p>
 <pre class="r"><code>new_table3D &lt;-left_join(fifa_players_attribures[1:35],fifa[1:3],by=c(&quot;ID&quot;=&quot;ID&quot; ))  
 filter_3D &lt;- filter(new_table3D,Age &lt;= 35)

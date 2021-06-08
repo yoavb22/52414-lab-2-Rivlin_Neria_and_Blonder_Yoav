@@ -355,21 +355,22 @@ PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q3C
 ```{r}
 vec_name <- names(fifa_players_positions)
-m = matrix(0,53,30)
+m = matrix(0,1,30)
 new_data3C <- data.frame(m)
 names(new_data3C) <- c(vec_name)
-
 for (i in 2:27){
- # filter_data <- filter(fifa_players_positions,
-         #               grepl(vec_name[i],Preferred.Positions)==TRUE)
-  new_data3C[(2*(i)-1):(2*(i)),] <-  fifa_players_positions %>% 
+  new_data <-  fifa_players_positions %>% 
   arrange(desc(fifa_players_positions[i])) %>% 
-  head(2)
+  head(10)
+  new_data <- filter(new_data,new_data[i]==new_data[1,i])
+  new_data3C <- rbind(new_data3C,new_data)
 }
+new_data3C <- new_data3C[2:43,]
 GK_filter <- filter(fifa_players_positions,Preferred.Positions=="GK ")
-new_data3C[53,] <-  GK_filter %>% 
+GK_filter <-  GK_filter %>% 
   arrange(desc(GK_filter[,29])) %>% 
   head(1)
+new_data3C <- rbind(new_data3C,GK_filter)
 uniq_palyer  <-  new_data3C %>% 
                     distinct(ID, .keep_all = TRUE) 
 top_11_player <- uniq_palyer %>% 
@@ -377,18 +378,12 @@ top_11_player <- uniq_palyer %>%
   head(11)
 top_11_player <- left_join(top_11_player, fifa[1:2] ,by=c("ID"="ID"))
 top_11_player <-select(top_11_player,Name,Overall)
-top_6_player <- filter(fifa,Name =="Cristiano Ronaldo"|Name=="L. Messi"|Name=="M. Neuer"|Name=="R. Lewandowski"|Name=="Sergio Ramos"|Name=="T. Kroos")
+top_6_player <- filter(fifa,Name =="Cristiano Ronaldo"|Name=="L. Messi"|Name=="M. Neuer"|Name=="A. Vidal"|Name=="Sergio Ramos"|Name=="T. Kroos")
 top_6_player_10_skills <- select(top_6_player,Name,names(top_10_average_cor_skill))
 radarDF <- gather(top_6_player_10_skills, key=Label, value=Score, -Name) %>%
   spread(key=Name, value=Score)
 
 chartJSRadar(scores = radarDF, maxScale = 100, showToolTipLabel = TRUE)
-
-  #filter_data <- filter(fifa_players_positions,
- #                       grepl(vec_name[2],Preferred.Positions)==TRUE)
- # new_data3C[1,] <-  filter_data %>% 
- # arrange(desc(filter_data[2])) %>% 
-#  head(1)
 
 ```
 PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
