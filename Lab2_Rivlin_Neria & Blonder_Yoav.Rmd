@@ -1,7 +1,7 @@
 ---
-title: "52414: Lab 2"
-author: ""
-date: "June 1, 2021"
+title: "Lab2_Rivlin_Neria & Blonder_Yoav"
+author: "yoav blonder"
+date: "11 6 2021"
 output: html_document
 ---
 
@@ -120,11 +120,14 @@ fifa_players_indicators <- fifa[,c(1,6,7,10,11)] # players general ability
 ```
 
 Q1A
+
+In order to see the overall distribution we are using a barplot. In order to check whether it is skewed we will use the skewness function we saw in class which returns a number. If the number is positive and far from 0 the distribution has a fat tail on the right, if its positive but close to 0 it has a small tail on the right. If its the same with a negative number its the same but with a left tail.
+
 ```{r}
 ave_ove = mean(fifa$Overall)
 med_ove = median(fifa$Overall)
 sd_ove = sd(fifa$Overall)
-tail = skewness(fifa$Overall)
+
 h <- hist(fifa$Overall, breaks = 10, density = 10,
           col = "lightgray", xlab = "Overall", main = "histogram of overall") 
 xfit <- seq(min(fifa$Overall), max(fifa$Overall), length = 40) 
@@ -132,24 +135,39 @@ yfit <- dnorm(xfit, mean = mean(fifa$Overall), sd = sd(fifa$Overall))
 yfit <- yfit * diff(h$mids[1:2]) * length(fifa$Overall) 
 lines(xfit, yfit, col = "black", lwd = 2)
 
+skewness(fifa$Overall)
+
 ```
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+As we can see the distribution looks very normal. Next, the skewness number is small and positive so so there is a small tail to the right.
+After ploting a Normal distribution matching on top of the data we can see it almost fitts perfectly so the distribution is well described by a Normal distribution.
+
 Q1B
+
+Because we are asked to compare among 6 continents it is best to show the results with a multiple box plot. That way one can compare the median and see the residuals better.
 ```{r}
 fifa %>% ggplot(aes(x=Continent, y=Overall, fill=Continent)) +
   geom_boxplot()+labs(title = "boxplot of overall gruop by continent")
 
 ```
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+As we can see Africa and South America has the highest mean and the Quantile boxes are the highest among all continents so we can say they have the best players. But Europe and South America have many outliers on top with means extrimelly good players, so if we combine the outliers and the quantiles we can safely say South America has the best players.
+
 Q1C
+
 ```{r}
 ggplot(fifa, aes(x=Value))+
   geom_density(color="darkblue", fill="lightblue")+labs(title = "density of Value")
 ggplot(fifa, aes(x=log(Value)))+
   geom_density(color="darkblue", fill="lightblue")+labs(title = "density of log Value")
 ```
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+As we can see in the original density plot the numbers are very large so its very unreadable. On the other hand the log density is much clearer to the reader.
+
 Q1D
+
+In order to show the wanted tables we will use the head(n) function we saw in the past.
+
 ```{r}
 q_1_D_f <- select(fifa,Name,Overall,Value)
 q_1_D_1 <- q_1_D_f %>% 
@@ -165,9 +183,10 @@ print(q_1_D_2)
 
 ```
 
-Manuel Neuer is the best player out from the top 10 values player
+Manuel Neuer is the best player not in the top 10 values player.
 
 Q1E
+
 ```{r}
 group_1E <- group_by(fifa,Club)
 summ_1E <- summarize(group_1E, ave_age=mean(Age))
@@ -180,10 +199,12 @@ q_1_E_2 <- summ_1E %>%
   head(10)
 print(q_1_E_2)
 
-
-
 ```
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+As one can see we only grouped by the clubs and summarized by age for the old players ans by -age for young players.
+
+
+
 
 ## Q2. Scouting Report (30 pt)
 
@@ -204,51 +225,66 @@ e. Repeat the above analysis but this time display a world map where each countr
 
 
 Q2A
+
+In order to answer the question first we filter the players by age. Then we group them by the age and summarize that group by the potential mean. 
+
 ```{r}
 filter_2A <- filter(fifa,Age <= 35)
 group_2A <- group_by(filter_2A,Age)
 summ_2B <- summarize(group_2A, ave_pot=mean(Potential))
-p_2A <- ggplot(summ_2B, aes(x = Age, y = ave_pot))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="average potential",title = "average potential to age")
-p_2A
+
+ggplot(summ_2B, aes(x = Age, y = ave_pot))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="average potential",title = "average potential to age")
+
 ```
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+In the plot we can see that younger players have a higher potential average, and as they get older there average gets lower.
+
 Q2B
+
+We are asked to do the same as before but for the difference between the overall and the potential.
+
 ```{r}
 filter_2B <- filter(fifa,Age <= 35)
 group_2B <- group_by(filter_2B,Age)
 summ_2B <- summarize(group_2B, ave_def_pot_over=-mean(Overall - Potential))
-p_2B <- ggplot(summ_2B, aes(x = Age, y = ave_def_pot_over))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="average diffrent of potential and overall",title = "average diffrent of potential and overall to age")
-p_2B
+
+ggplot(summ_2B, aes(x = Age, y = ave_def_pot_over))+geom_point(data = summ_2B, color = "red") + labs(x="Age", y="average of difference between potential and overall",title = "average of difference between potential and overall by age")
+
 ```
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+As we can see as from age 27 the difference between the potential and the overall tends to zero, and before that age the playersstill have a potential. The players with most potential are the youngest.
+
 Q2C
+
+Firstlly we filter by age and potential, then we make a regression of the potential compared to the value. Then we take out the slope and intercept that we will need for the computation of the real value. We arrange the table by descent order by the real value, where the real value will be x from the form y=ax+b of regression and y is the potential. Then we will show the new table of 10 top players.
+
 ```{r}
 filter_2C <- filter(fifa,Age < 21 & Potential > 70)
 new_table2c <- select(filter_2C,Name,Age,Overall,Potential,Value)
-reg_val_pot <- lm(Potential ~ Value, data = new_table2c)
-reg_2C <- lm(data=new_table2c,Potential ~ Value)
+reg_2C <- lm(data=new_table2c,Value ~ Potential)
 sum_red_2C <- summary(reg_2C)
 intercept <- sum_red_2C$coefficients[1]
 slope <- sum_red_2C$coefficients[2]
 resid <- resid(reg_2C) #List of residuals
 new_table2c$real_value <- resid
 new_table2c1 <- new_table2c %>% 
-  arrange(desc(real_value)) %>% 
+  arrange(desc(-real_value)) %>% 
   head(10)
 new_table2c2 <- new_table2c %>% 
   arrange(desc(real_value))
-new_table2c1$real_value <- (new_table2c1$Potential*(1/slope))-intercept
-print(new_table2c1)
-p2C <- ggplot(data = new_table2c2, aes(x = Potential, y = Value))+ geom_text(aes(label=Name), size = 2.5, hjust='bottom',check_overlap = TRUE, nudge_x = 0.05)+ geom_smooth(method="lm", se=TRUE, fullrange=FALSE, level=0.95) +  theme_gray() + theme(legend.position = c(0.94, 0.9)) + ggtitle('Ratings of Value as a function of Potential') + geom_text(data =new_table2c1, aes(label=Name), size = 3, nudge_x = 0.05,col="red")
+new_table2c1$real_value <- ((new_table2c1$Potential)*(slope)+intercept)
+new_table2c1
+p2C <- ggplot(data = new_table2c2, aes(x = Potential, y = Value))+ geom_text(aes(label=Name), size = 2.5, hjust='bottom',check_overlap = TRUE, nudge_x = 0.05)+ geom_smooth(method="lm", se=TRUE, fullrange=FALSE, level=0.95) +  theme_gray() + theme(legend.position = c(0.94, 0.9)) + ggtitle('Ratings of Value as a function of Potential - players names') + geom_text(data =new_table2c1, aes(label=Name), size = 3, nudge_x = 0.05,col="red")
 p2C1 <- ggplot(data = new_table2c2, aes(x = Potential, y = Value))+ geom_point(aes(color=Overall))+ geom_smooth(method="lm", se=TRUE, fullrange=FALSE, level=0.95) +   geom_smooth(method="lm", se=TRUE, fullrange=FALSE, level=0.95) +  theme_gray() + theme(legend.position = c(0.94, 0.9)) + ggtitle('Ratings of Value as a function of Potential') + geom_text(data =new_table2c1, aes(label=Name), size = 3,check_overlap = TRUE, nudge_x = 0.2,col="red")
 p2C1
 p2C
 
 ```
 
+As we can see we got a new table of the top 10 players that are underrated. In the regression we want the players that are far from the abline down and right, meaning with low price and high value. We even colored in red those players.
 
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
 Q2D
+
 ```{r}
 group_2D <- group_by(fifa,Nationality)
 summ_2D <- summarize(group_2D, med_pot=median(Potential))
@@ -263,9 +299,10 @@ mapCountryData( sPDF, nameColumnToPlot="med_pot",,catMethod = "fixedWidth",
 
 ```
 
-
+White countries are not in the table, the more the color is dark the bigger chance to find a great player, for the average there is high. (as we can see South America is pretty dark as we showed in a previous question).
 
 Q2E
+
 ```{r}
 group_2E <- group_by(fifa,Nationality)
 summ_2E <- summarize(group_2E, med_pot_val=(median(Value)/median(Potential)))
@@ -282,7 +319,7 @@ mapCountryData( sPDF_2E, nameColumnToPlot="med_pot_val",,catMethod = "fixedWidth
 
 ```
 
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+Here most of the world is bright because it is pretty rare to find great players in cheap prices, but there are a few dark countries as we can see, so it is highly recommended for the scouts to go there.
 
 
 ## Q3. Correlations Analysis (30 pt)
@@ -324,6 +361,9 @@ and list them in a table.
 
 
 Q3A
+
+In this question we need to plot a heat map of the correlation using corplot. 
+
 ```{r}
 cor_met_3A_pos <- cor(fifa_players_positions[2:27],fifa_players_positions[2:27])
 P3A <-corrplot(cor_met_3A_pos,title="heat map of fifa players positions of ",tl.cex = 0.5,order='hclust',mar=c(0,3,1,0))
@@ -335,8 +375,15 @@ cor_met_3A1_pos <- cor(fifa_players_positions[2:27],
                        new_table3A[1:29])
 P3A1 <-corrplot(cor_met_3A1_pos,title="heat map of fifa players positions of players skills",tl.cex = 0.5,mar=c(0,3,1,0))
 ```
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+For the first question where we compared the different positions brighter colors represent low correlation, and darker colors represent high correlation. As we can see the 3 position with the brightest colors are RCB,CB and LCB.
+For the second question about the similarity of the different skills, we can see clearly that Jumping and Strength are very bright so are uncorrelated to other skills.
+
+
 Q3B
+
+Here we want to compare some indicators to some variables. In order to do so we will take a look at a correlation table a little different than before that plots black and white circles. Black circles are negative correlation, and white circles are positive correlation, and the bigger the circle is the larger the correlation is. 
+
 ```{r}
 new_table_3B <- left_join(fifa_players_attribures, fifa_players_indicators ,by=c("ID"="ID" ,"Overall"="Overall"))
 cor_met_3B <- cor(new_table_3B[36:39],new_table_3B[2:35])
@@ -348,11 +395,16 @@ ave_cor <- sum_cor/4
 sort_top_ave <- sort(ave_cor)
 top_10_average_cor_skill <-sort_top_ave[34:25]
 top_10_table <- data.frame(top_10_average_cor_skill)
-
+top_10_table
 
 ```
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+
+
 Q3C
+
+Each position we want to arrange by descent order with a for loop, then we want to take 10 the best players from the 26 positions by using the head(10) function on that arranged table, and then take the best goal kipper so we will get an 11 players team.
+
 ```{r}
 vec_name <- names(fifa_players_positions)
 m = matrix(0,1,30)
@@ -378,6 +430,7 @@ top_11_player <- uniq_palyer %>%
   head(11)
 top_11_player <- left_join(top_11_player, fifa[1:2] ,by=c("ID"="ID"))
 top_11_player <-select(top_11_player,Name,Overall)
+top_11_player
 top_6_player <- filter(fifa,Name =="Cristiano Ronaldo"|Name=="L. Messi"|Name=="M. Neuer"|Name=="A. Vidal"|Name=="Sergio Ramos"|Name=="T. Kroos")
 top_6_player_10_skills <- select(top_6_player,Name,names(top_10_average_cor_skill))
 radarDF <- gather(top_6_player_10_skills, key=Label, value=Score, -Name) %>%
@@ -386,8 +439,14 @@ radarDF <- gather(top_6_player_10_skills, key=Label, value=Score, -Name) %>%
 chartJSRadar(scores = radarDF, maxScale = 100, showToolTipLabel = TRUE)
 
 ```
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
+The top 11 player table got us the best 11 players. The top 6 player plot shows us for 6 players from our team there abilities. Each color is for a different player and we check there abilities over 10 skills, as it should be in a radar chart.
+
+
 Q3D
+
+The best way to show the change in abilities as players get older is by multiple table one for each skill.
+
 ```{r}
 new_table3D <-left_join(fifa_players_attribures[1:35],fifa[1:3],by=c("ID"="ID" ))  
 filter_3D <- filter(new_table3D,Age <= 35)
@@ -398,14 +457,22 @@ skills_per_age <- gather(group3D,skills, value, -Age)
 ggplot(data=skills_per_age, aes(x=Age, y=value, group=skills)) + 
   geom_line(col="red")+ 
   ggtitle("Player's Abilities VS Age") + 
-  theme(plot.title = element_text(hjust = 0.5,colour="blue"))+ 
+  theme(plot.title = element_text(hjust = 0.5,color="blue"))+ 
   facet_wrap(~skills)  + 
   theme(legend.position="none")
 ```
 
+The skills getting a peak for younger players are: acceleration, Agility, sprint speed.
+
+The skills getting a peak for older players are: GK.diving,GK.handling,GK.kicking,GK.positioning,GK.reflexes,Free kick accuracy,Aggression,strength.
+
+It makes a lot of sense that all GK skills are improved for older GK because it is possible that GK tend to play for more years than an average player.
 
 
 Q3E
+
+All we need to do for this question is to make a new table, create a regression between the wanted variables, and arrange by descent order the residuals. The top 10 residuals are the wanted players.
+
 ```{r}
 new_table3E <- select(fifa,Name,Overall,Age,Wage)
 reg_Ov_Ag_Wa <- lm(Overall ~ Age+Wage, data = new_table3E)
@@ -419,6 +486,10 @@ new_table3E1
 
 
 ```
+
+The players in the table are the most underrated players.
+
+
 
 
 ## Q4. Fix Problematic Plots (10 pt)
@@ -458,14 +529,16 @@ g
 ```
 
 Q4A
+The first graph tries to shows the number of forein players in the different clubs, and the top 8 teams with most players from different nationalities. The second one shows the propensity of forein players in the different clubs, and plots the 12 last clubs, meaning those who has most players from the same nationality.
 
-PLEASE ADD YOUR SOLUTION BELOW, WITH A CLEAR SEPARATION BETWEEN THE PARTS!
+
 Q4B
-He dont clean the data he still have 'NA' column
-the color of bars is same and only the line diffrent and its not clear
-you cant read the text under plot
-the plot dont have a title
-the axis y dont have a informtiv 
+He did not clean the data, he still has a 'NA' column.
+The color of bars is the same and only the line is different.
+The text under the plot is unclear.
+The plot dosen't have a title.
+The y axis dosen't have an informtiv label. 
+
 Q4C
 ```{r}
 
@@ -477,14 +550,14 @@ DIV_in_club <- cleaned_data %>%filter(Club!="")%>% group_by(Club) %>% summarise(
 
 # Plot number of different nationalities in each club
 g <- ggplot(data = number_of_nationality_in_club %>% head(8), aes(x = Club, y = N_nation,fill = Club))
-g + geom_bar(stat="identity")+ theme(axis.text.x = element_text(face = "bold", size = 9, angle = -90, hjust = 0)) + ylab('new_title_y') +
-labs(title="new_title")
-g
+g + geom_bar(stat="identity")+ theme(axis.text.x = element_text(face = "bold", size = 9, angle = -90, hjust = 0)) + ylab('amount of different nationalities') +
+labs(title="amount of different nationalities in clubs (top 8)")
+
 
 # Plot DIV (diversity?) of different nationalities in each club
 g <- ggplot(data = DIV_in_club %>% head(12),aes(x = Club,y = DIV, fill = Club))
-g <- g + geom_bar(stat="identity") + theme(axis.text.x = element_text(face = "bold", size = 9, angle = -90, hjust = 0)) + ylab('new_title_y') +
-labs(title="new_title")
+g <- g + geom_bar(stat="identity") + theme(axis.text.x = element_text(face = "bold", size = 9, angle = -90, hjust = 0)) + ylab('propensity') +
+labs(title="propensity of players from different nationality among all(last 12)")
 g
 
 ```
